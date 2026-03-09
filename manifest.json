@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "netkeiba リーディング＆血統表示拡張",
+  "name": "netkeiba-extension リーディング＆血統表示",
   "version": "1.0.0",
   "description": "出馬表に騎手・調教師・種牡馬・BMSの全国リーディング順位を表示します",
   "permissions": [],

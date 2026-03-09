@@ -10,11 +10,11 @@ netkeiba の出馬表（PCブラウザ版）に、騎手・調教師・種牡馬
 
 ## Git の初期セットアップ（初回のみ）
 
-1. GitHub で新規リポジトリ `netkeiba` を作成（README 等は追加しない）
+1. GitHub で新規リポジトリ `netkeiba-extension` を作成（README 等は追加しない）
 2. リモート URL を設定してプッシュ：
 
 ```bash
-git remote set-url origin https://github.com/<あなたのGitHubユーザー名>/netkeiba.git
+git remote set-url origin https://github.com/<あなたのGitHubユーザー名>/netkeiba-extension.git
 git push -u origin main
 ```
 
@@ -27,14 +27,14 @@ git push -u origin main
 1. 本リポジトリを GitHub にプッシュ
 2. リポジトリの **Settings → Pages** で Source を **GitHub Actions** に設定
 3. **Actions** タブから「Update ranking.json」ワークフローを手動実行
-4. デプロイ完了後、`https://<あなたのGitHubユーザー名>.github.io/netkeiba/ranking.json` にアクセスできることを確認
+4. デプロイ完了後、`https://<あなたのGitHubユーザー名>.github.io/netkeiba-extension/ranking.json` にアクセスできることを確認
 
 ### 2. 拡張機能の ranking.json URL を設定
 
 `src/shared/ranking-client.js` の `RANKING_JSON_URL` を、上記で確認した URL に置き換えてください。
 
 ```javascript
-const RANKING_JSON_URL = 'https://<あなたのGitHubユーザー名>.github.io/netkeiba/ranking.json';
+const RANKING_JSON_URL = 'https://<あなたのGitHubユーザー名>.github.io/netkeiba-extension/ranking.json';
 ```
 
 ### 3. 拡張機能の読み込み

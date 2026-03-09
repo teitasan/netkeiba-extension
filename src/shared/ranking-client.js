@@ -4,7 +4,7 @@
  */
 
 // GitHub Pages デプロイ後、YOUR_USERNAME を実際のGitHubユーザー名に置換してください
-const RANKING_JSON_URL = 'https://YOUR_USERNAME.github.io/netkeiba/ranking.json';
+const RANKING_JSON_URL = 'https://YOUR_USERNAME.github.io/netkeiba-extension/ranking.json';
 
 let cachedRanking = null;
 let fetchPromise = null;
