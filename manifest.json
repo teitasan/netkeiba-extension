@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "netkeiba リーディング＆血統表示拡張",
+  "version": "1.0.0",
+  "description": "出馬表に騎手・調教師・種牡馬・BMSの全国リーディング順位を表示します",
+  "permissions": [],
+  "content_scripts": [
+    {
+      "matches": ["https://race.netkeiba.com/race/shutuba.html*"],
+      "js": ["src/shared/ranking-client.js", "src/content/index.js"],
+      "css": ["src/content/styles.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}
