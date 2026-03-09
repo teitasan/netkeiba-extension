@@ -8,6 +8,18 @@ netkeiba の出馬表（PCブラウザ版）に、騎手・調教師・種牡馬
 - **表示内容**: 騎手・調教師・父（種牡馬）・母父の各リンク横に全国リーディング順位を数字で表示
 - **デザイン**: 騎手・調教師は青系、種牡馬・BMSは紫系で区別。上位5位・10位は強調表示
 
+## Git の初期セットアップ（初回のみ）
+
+1. GitHub で新規リポジトリ `netkeiba` を作成（README 等は追加しない）
+2. リモート URL を設定してプッシュ：
+
+```bash
+git remote set-url origin https://github.com/<あなたのGitHubユーザー名>/netkeiba.git
+git push -u origin main
+```
+
+※ 既に `git init` と初回コミットは済んでいます。
+
 ## セットアップ
 
 ### 1. ranking.json の配信
