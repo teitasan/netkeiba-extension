@@ -9,7 +9,13 @@
 
 const fs = require('fs');
 const path = require('path');
-const { CONFIG, parsePage, buildRankMap, getPageUrl } = require('./lib/parse-ranking-pages');
+const {
+  CONFIG,
+  parsePage,
+  buildRankMap,
+  buildNameToIdMap,
+  getPageUrl,
+} = require('./lib/parse-ranking-pages');
 
 const OUT_DIR = path.join(__dirname, '..', 'public');
 const OUT_FILE = path.join(OUT_DIR, 'ranking.json');
@@ -22,7 +28,13 @@ async function fetchHtml(url) {
     },
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}: ${url}`);
-  return res.text();
+  const buf = await res.arrayBuffer();
+  // netkeiba は EUC-JP で返すため、正しくデコードする
+  try {
+    return new TextDecoder('euc-jp').decode(buf);
+  } catch {
+    return new TextDecoder('utf-8').decode(buf);
+  }
 }
 
 async function scrapeCategory(category) {
@@ -47,6 +59,10 @@ async function scrapeCategory(category) {
 
   const map = buildRankMap(entries);
   console.log(`[${category}] ${Object.keys(map).length} 件取得`);
+  if (category === 'sire' || category === 'bms') {
+    const nameToId = buildNameToIdMap(entries);
+    return { rankMap: map, nameToId };
+  }
   return map;
 }
 
@@ -55,7 +71,7 @@ async function main() {
   const jst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
   const updatedAt = jst.toISOString().replace(/\.\d{3}Z$/, '+09:00');
 
-  const [jockey, trainer, sire, bms] = await Promise.all([
+  const [jockey, trainer, sireResult, bmsResult] = await Promise.all([
     scrapeCategory('jockey'),
     scrapeCategory('trainer'),
     scrapeCategory('sire'),
@@ -66,8 +82,10 @@ async function main() {
     updated_at: updatedAt,
     jockey,
     trainer,
-    sire,
-    bms,
+    sire: sireResult.rankMap,
+    bms: bmsResult.rankMap,
+    sire_name_to_id: sireResult.nameToId,
+    bms_name_to_id: bmsResult.nameToId,
   };
 
   fs.mkdirSync(OUT_DIR, { recursive: true });

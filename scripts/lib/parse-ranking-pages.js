@@ -46,7 +46,15 @@ function parsePage(html, category) {
     if (!idMatch) continue;
 
     const id = idMatch[1];
-    results.push({ rank, id });
+    const entry = { rank, id };
+    // 種牡馬・BMS: リンクテキスト（名前）を抽出し、テキスト表示ページ用の名前→IDマップに利用
+    if (category === 'sire' || category === 'bms') {
+      const linkTextMatch = row.match(/href="[^"]*"[^>]*>([^<]+)<\/a>/);
+      if (linkTextMatch) {
+        entry.name = linkTextMatch[1].trim();
+      }
+    }
+    results.push(entry);
   }
 
   return results;
@@ -69,6 +77,21 @@ function buildRankMap(entries) {
 }
 
 /**
+ * 種牡馬・BMS用: 名前→IDのマップを構築する（テキスト表示ページで順位表示に利用）
+ * @param {Array<{id:string, name?:string}>} entries
+ * @returns {Object<string, string>}
+ */
+function buildNameToIdMap(entries) {
+  const map = {};
+  for (const { id, name } of entries) {
+    if (name) {
+      map[name] = id;
+    }
+  }
+  return map;
+}
+
+/**
  * ページネーション用のURLを生成する
  */
 function getPageUrl(category, page = 1) {
@@ -81,5 +104,6 @@ module.exports = {
   CONFIG,
   parsePage,
   buildRankMap,
+  buildNameToIdMap,
   getPageUrl,
 };
