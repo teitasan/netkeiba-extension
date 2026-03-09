@@ -2,8 +2,7 @@
  * netkeiba 出馬表ページにリーディング順位バッジを挿入する
  * 騎手・調教師・父（種牡馬）・母父（BMS）の各リンクからIDを抽出し、
  * ranking.json と照合して順位を表示する
- * newspaper / shutuba_past / shutuba_past_9 では父・母父がテキストのため、
- * 名前→IDマップで照合してバッジを表示する
+ * 父・母父はリンクでなくても、テキスト表示の場合は名前→IDマップで照合してバッジを表示する
  */
 
 (function () {
@@ -14,12 +13,6 @@
     trainer: 'a[href*="db.netkeiba.com/trainer/"]',
     sire: 'a[href*="db.netkeiba.com/horse/sire/"], a[href*="db.netkeiba.com/horse/ped/"]',
   };
-
-  const TEXT_PAGES = ['newspaper.html', 'shutuba_past.html', 'shutuba_past_9.html'];
-
-  function isTextPage() {
-    return TEXT_PAGES.some((p) => location.pathname.includes(p));
-  }
 
   /**
    * 順位に応じたバッジの追加クラスを返す（トップ5/10強調）
@@ -90,10 +83,10 @@
   }
 
   /**
-   * newspaper / shutuba_past / shutuba_past_9 用: テキストの父・母父名の横にバッジを挿入
+   * リンクでない父・母父名（テキスト）の横にもバッジを挿入する（全ページ対象）
    */
   function applyBadgesForTextNames(ranking) {
-    if (!ranking || !isTextPage()) return;
+    if (!ranking) return;
 
     const { sire = {}, bms = {}, sire_name_to_id = {}, bms_name_to_id = {} } = ranking;
     if (Object.keys(sire_name_to_id).length === 0 && Object.keys(bms_name_to_id).length === 0) {
@@ -110,6 +103,15 @@
             const tag = (p.tagName || '').toUpperCase();
             if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'NOSCRIPT') {
               return NodeFilter.FILTER_REJECT;
+            }
+            if (p.hasAttribute && p.hasAttribute(TEXT_BADGE_ATTR)) {
+              return NodeFilter.FILTER_REJECT;
+            }
+            if (tag === 'A') {
+              const href = (p.getAttribute('href') || '').toString();
+              if (href.includes('horse/sire/') || href.includes('horse/ped/')) {
+                return NodeFilter.FILTER_REJECT;
+              }
             }
             p = p.parentNode;
           }
@@ -130,7 +132,7 @@
       if (sire_name_to_id[text]) {
         const id = sire_name_to_id[text];
         rank = sire[id] || null;
-      } else if (text.startsWith('(') && text.endsWith(')')) {
+      } else if ((text.startsWith('(') && text.endsWith(')')) || (text.startsWith('（') && text.endsWith('）'))) {
         const inner = text.slice(1, -1).trim();
         if (bms_name_to_id[inner]) {
           const id = bms_name_to_id[inner];
@@ -148,11 +150,39 @@
     });
   }
 
+  let rankingCache = null;
+
+  function run(ranking) {
+    if (!ranking) return;
+    applyBadges(ranking);
+    applyBadgesForTextNames(ranking);
+  }
+
   async function main() {
     try {
       const ranking = await fetchRanking();
-      applyBadges(ranking);
-      applyBadgesForTextNames(ranking);
+      rankingCache = ranking;
+      run(ranking);
+
+      // 動的読み込み対応: 少し遅れて再実行
+      setTimeout(() => run(ranking), 800);
+      setTimeout(() => run(ranking), 2000);
+
+      // DOM 変更を監視して再実行（馬柱など遅延読み込み対応）
+      let debounceTimer = null;
+      const observer = new MutationObserver(() => {
+        if (!rankingCache) return;
+        if (debounceTimer) clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+          debounceTimer = null;
+          run(rankingCache);
+        }, 300);
+      });
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+      });
+      setTimeout(() => observer.disconnect(), 8000);
     } catch (err) {
       console.warn('[netkeiba拡張] 順位表示エラー:', err.message);
     }
