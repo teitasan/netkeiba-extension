@@ -4,7 +4,11 @@ netkeiba の出馬表（PCブラウザ版）に、騎手・調教師・種牡馬
 
 ## 機能
 
-- **対象ページ**: https://race.netkeiba.com/race/shutuba.html*（出馬表）
+- **対象ページ**: 出馬表・競馬新聞・馬柱（5走/9走）
+  - `race/shutuba.html*`
+  - `race/newspaper.html*`
+  - `race/shutuba_past.html*`
+  - `race/shutuba_past_9.html*`
 - **表示内容**: 騎手・調教師・父（種牡馬）・母父の各リンク横に全国リーディング順位を数字で表示
 - **デザイン**: 騎手・調教師は青系、種牡馬・BMSは紫系で区別。上位5位・10位は強調表示
 

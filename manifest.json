@@ -6,7 +6,12 @@
   "permissions": [],
   "content_scripts": [
     {
-      "matches": ["https://race.netkeiba.com/race/shutuba.html*"],
+      "matches": [
+        "https://race.netkeiba.com/race/shutuba.html*",
+        "https://race.netkeiba.com/race/newspaper.html*",
+        "https://race.netkeiba.com/race/shutuba_past.html*",
+        "https://race.netkeiba.com/race/shutuba_past_9.html*"
+      ],
       "js": ["src/shared/ranking-client.js", "src/content/index.js"],
       "css": ["src/content/styles.css"],
       "run_at": "document_idle"
