@@ -83,6 +83,29 @@
   }
 
   /**
+   * テキストノードを処理してバッジを挿入
+   */
+  function processTextNode(node, sire, bms, sire_name_to_id, bms_name_to_id) {
+    const text = node.textContent.trim();
+    if (!text) return null;
+
+    if (sire_name_to_id[text]) {
+      const id = sire_name_to_id[text];
+      const rank = sire[id] || null;
+      return rank ? { node, rank } : null;
+    }
+    if ((text.startsWith('(') && text.endsWith(')')) || (text.startsWith('（') && text.endsWith('）'))) {
+      const inner = text.slice(1, -1).trim();
+      if (bms_name_to_id[inner]) {
+        const id = bms_name_to_id[inner];
+        const rank = bms[id] || null;
+        return rank ? { node, rank } : null;
+      }
+    }
+    return null;
+  }
+
+  /**
    * リンクでない父・母父名（テキスト）の横にもバッジを挿入する（全ページ対象）
    */
   function applyBadgesForTextNames(ranking) {
@@ -93,6 +116,37 @@
       return;
     }
 
+    const toProcess = [];
+
+    // 方法1: 出走馬リンクを起点に、同一セル内のテキストを探索（馬柱の構造に対応）
+    const horseLinks = document.querySelectorAll('a[href*="db.netkeiba.com/horse/"]');
+    horseLinks.forEach((a) => {
+      const href = (a.getAttribute('href') || '').toString();
+      if (href.includes('horse/sire/') || href.includes('horse/ped/')) return;
+
+      const container = a.closest('td') || a.closest('div') || a.parentElement;
+      if (!container) return;
+
+      const subWalker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
+      let subNode;
+      while ((subNode = subWalker.nextNode())) {
+        if (subNode.parentElement && subNode.parentElement.hasAttribute && subNode.parentElement.hasAttribute(TEXT_BADGE_ATTR)) continue;
+        let p = subNode.parentNode;
+        let skip = false;
+        while (p && p !== container) {
+          if (p.tagName === 'A') {
+            const h = (p.getAttribute('href') || '').toString();
+            if (h.includes('horse/sire/') || h.includes('horse/ped/')) { skip = true; break; }
+          }
+          p = p.parentNode;
+        }
+        if (skip) continue;
+        const result = processTextNode(subNode, sire, bms, sire_name_to_id, bms_name_to_id);
+        if (result) toProcess.push(result);
+      }
+    });
+
+    // 方法2: 全文走査（テーブル外の表示にも対応）
     const walker = document.createTreeWalker(
       document.body,
       NodeFilter.SHOW_TEXT,
@@ -101,17 +155,11 @@
           let p = node.parentNode;
           while (p && p !== document.body) {
             const tag = (p.tagName || '').toUpperCase();
-            if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'NOSCRIPT') {
-              return NodeFilter.FILTER_REJECT;
-            }
-            if (p.hasAttribute && p.hasAttribute(TEXT_BADGE_ATTR)) {
-              return NodeFilter.FILTER_REJECT;
-            }
+            if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'NOSCRIPT') return NodeFilter.FILTER_REJECT;
+            if (p.hasAttribute && p.hasAttribute(TEXT_BADGE_ATTR)) return NodeFilter.FILTER_REJECT;
             if (tag === 'A') {
               const href = (p.getAttribute('href') || '').toString();
-              if (href.includes('horse/sire/') || href.includes('horse/ped/')) {
-                return NodeFilter.FILTER_REJECT;
-              }
+              if (href.includes('horse/sire/') || href.includes('horse/ped/')) return NodeFilter.FILTER_REJECT;
             }
             p = p.parentNode;
           }
@@ -120,32 +168,17 @@
       },
       false
     );
-
-    const toProcess = [];
     let node;
     while ((node = walker.nextNode())) {
-      const text = node.textContent.trim();
-      if (!text) continue;
-
-      let rank = null;
-
-      if (sire_name_to_id[text]) {
-        const id = sire_name_to_id[text];
-        rank = sire[id] || null;
-      } else if ((text.startsWith('(') && text.endsWith(')')) || (text.startsWith('（') && text.endsWith('）'))) {
-        const inner = text.slice(1, -1).trim();
-        if (bms_name_to_id[inner]) {
-          const id = bms_name_to_id[inner];
-          rank = bms[id] || null;
-        }
-      }
-
-      if (rank) {
-        toProcess.push({ node, rank });
-      }
+      const result = processTextNode(node, sire, bms, sire_name_to_id, bms_name_to_id);
+      if (result) toProcess.push(result);
     }
 
+    // 重複を除去（同一ノードを複数回処理しない）
+    const seen = new WeakSet();
     toProcess.forEach(({ node, rank }) => {
+      if (seen.has(node)) return;
+      seen.add(node);
       insertBadgeForTextNode(node, rank, false);
     });
   }

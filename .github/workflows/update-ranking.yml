@@ -1,6 +1,11 @@
 name: Update ranking.json
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/**'
+      - 'public/ranking.json'
   schedule:
     # 木曜 18:00 JST = 金曜 09:00 UTC (JST-9)
     - cron: '0 9 * * 4'

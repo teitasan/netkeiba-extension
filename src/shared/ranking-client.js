@@ -20,7 +20,7 @@ async function fetchRanking() {
   fetchPromise = (async () => {
     try {
       const res = await fetch(RANKING_JSON_URL, {
-        cache: 'default',
+        cache: 'no-store',
         headers: { Accept: 'application/json' },
       });
       if (!res.ok) {
