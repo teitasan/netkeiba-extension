@@ -15,31 +15,85 @@
   };
 
   /**
-   * 順位に応じたバッジの追加クラスを返す（トップ5/10強調）
+   * 順位に応じたバッジの追加クラスを返す（1〜3位は色分け）
    */
   function getRankClass(rank, isPerson) {
-    const base = isPerson ? 'nk-badge-person' : 'nk-badge-sire';
-    if (rank <= 5) return `${base} nk-top5`;
-    if (rank <= 10) return `${base} nk-top10`;
-    return base;
+    if (rank === 1) return 'nk-ranking-badge nk-rank-1';
+    if (rank === 2) return 'nk-ranking-badge nk-rank-2';
+    if (rank === 3) return 'nk-ranking-badge nk-rank-3';
+    return 'nk-ranking-badge';
+  }
+
+  function formatPercent(value) {
+    if (typeof value !== 'number' || !Number.isFinite(value)) return null;
+    return `${(value * 100).toFixed(1)}%`;
+  }
+
+  function formatDecimal(value) {
+    if (typeof value !== 'number' || !Number.isFinite(value)) return null;
+    return value.toFixed(2).replace(/\.?0+$/, '');
+  }
+
+  function buildTooltipText(category, stats) {
+    if (!stats) return '';
+    if (category === 'jockey' || category === 'trainer') {
+      const lines = [];
+      const winRate = formatPercent(stats.win_rate);
+      const placeRate = formatPercent(stats.place_rate);
+      if (winRate) lines.push(`勝率: ${winRate}`);
+      if (placeRate) lines.push(`複勝率: ${placeRate}`);
+      return lines.join('\n');
+    }
+    if (category === 'sire' || category === 'bms') {
+      const lines = [];
+      const winHorseRate = formatPercent(stats.win_horse_rate);
+      const ei = formatDecimal(stats.ei);
+      if (winHorseRate) lines.push(`勝ち馬率: ${winHorseRate}`);
+      if (ei) lines.push(`EI: ${ei}`);
+      return lines.join('\n');
+    }
+    return '';
+  }
+
+  function applyTooltip(el, tooltipText) {
+    if (!el || !tooltipText) return;
+    el.title = tooltipText;
+    el.setAttribute('aria-label', tooltipText);
+  }
+
+  function detectPedigreeCategory(anchor, id, sire, bms, prefs) {
+    const hasSire = Boolean(prefs.sire && sire[id]);
+    const hasBms = Boolean(prefs.bms && bms[id]);
+    if (hasSire && hasBms) {
+      const prevText = anchor.previousSibling?.textContent || '';
+      const nextText = anchor.nextSibling?.textContent || '';
+      if (/[（(]\s*$/.test(prevText) || /^\s*[）)]/.test(nextText)) {
+        return 'bms';
+      }
+      return 'sire';
+    }
+    if (hasSire) return 'sire';
+    if (hasBms) return 'bms';
+    return null;
   }
 
   /**
    * 単一のリンク要素に順位バッジを挿入する
    */
-  function insertBadge(anchor, rank, isPerson) {
+  function insertBadge(anchor, rank, isPerson, tooltipText) {
     if (!anchor || anchor.querySelector(`[${BADGE_ATTR}]`)) return;
     const span = document.createElement('span');
     span.setAttribute(BADGE_ATTR, '1');
-    span.className = `nk-ranking-badge ${getRankClass(rank, isPerson)}`;
+    span.className = getRankClass(rank, isPerson);
     span.textContent = String(rank);
+    applyTooltip(span, tooltipText);
     anchor.appendChild(span);
   }
 
   /**
    * テキストノードをラップし、その横に順位バッジを挿入する
    */
-  function insertBadgeForTextNode(textNode, rank, isPerson) {
+  function insertBadgeForTextNode(textNode, rank, isPerson, tooltipText) {
     const parent = textNode.parentNode;
     if (!parent) return;
     const wrapper = document.createElement('span');
@@ -48,8 +102,9 @@
     wrapper.textContent = textNode.textContent;
     const badge = document.createElement('span');
     badge.setAttribute(BADGE_ATTR, '1');
-    badge.className = `nk-ranking-badge ${getRankClass(rank, isPerson)}`;
+    badge.className = getRankClass(rank, isPerson);
     badge.textContent = String(rank);
+    applyTooltip(badge, tooltipText);
     wrapper.appendChild(badge);
     parent.replaceChild(wrapper, textNode);
   }
@@ -75,13 +130,23 @@
     if (!ranking) return;
     prefs = prefs || DEFAULT_PREFS;
 
-    const { jockey = {}, trainer = {}, sire = {}, bms = {} } = ranking;
+    const {
+      jockey = {},
+      trainer = {},
+      sire = {},
+      bms = {},
+      jockey_stats = {},
+      trainer_stats = {},
+      sire_stats = {},
+      bms_stats = {},
+    } = ranking;
 
     if (prefs.jockey) {
       document.querySelectorAll(SELECTORS.jockey).forEach((a) => {
         const id = extractIdFromHref(a.getAttribute('href'));
         const rank = id ? jockey[id] : null;
-        if (rank) insertBadge(a, rank, true);
+        const tooltipText = id ? buildTooltipText('jockey', jockey_stats[id]) : '';
+        if (rank) insertBadge(a, rank, true, tooltipText);
       });
     }
 
@@ -89,7 +154,8 @@
       document.querySelectorAll(SELECTORS.trainer).forEach((a) => {
         const id = extractIdFromHref(a.getAttribute('href'));
         const rank = id ? trainer[id] : null;
-        if (rank) insertBadge(a, rank, true);
+        const tooltipText = id ? buildTooltipText('trainer', trainer_stats[id]) : '';
+        if (rank) insertBadge(a, rank, true, tooltipText);
       });
     }
 
@@ -97,10 +163,11 @@
       document.querySelectorAll(SELECTORS.sire).forEach((a) => {
         const id = extractIdFromHref(a.getAttribute('href'));
         if (!id) return;
-        const rank = prefs.sire ? sire[id] : null;
-        const bmsRank = prefs.bms ? bms[id] : null;
-        const r = rank || bmsRank;
-        if (r) insertBadge(a, r, false);
+        const category = detectPedigreeCategory(a, id, sire, bms, prefs);
+        if (!category) return;
+        const rank = category === 'sire' ? sire[id] : bms[id];
+        const stats = category === 'sire' ? sire_stats[id] : bms_stats[id];
+        if (rank) insertBadge(a, rank, false, buildTooltipText(category, stats));
       });
     }
   }
@@ -108,21 +175,32 @@
   /**
    * テキストノードを処理してバッジを挿入
    */
-  function processTextNode(node, sire, bms, sire_name_to_id, bms_name_to_id, prefs) {
+  function processTextNode(
+    node,
+    sire,
+    bms,
+    sire_name_to_id,
+    bms_name_to_id,
+    sire_stats,
+    bms_stats,
+    prefs
+  ) {
     const text = node.textContent.trim();
     if (!text) return null;
 
     if (prefs.sire && sire_name_to_id[text]) {
       const id = sire_name_to_id[text];
       const rank = sire[id] || null;
-      return rank ? { node, rank } : null;
+      const tooltipText = buildTooltipText('sire', sire_stats[id]);
+      return rank ? { node, rank, tooltipText } : null;
     }
     if (prefs.bms && ((text.startsWith('(') && text.endsWith(')')) || (text.startsWith('（') && text.endsWith('）')))) {
       const inner = text.slice(1, -1).trim();
       if (bms_name_to_id[inner]) {
         const id = bms_name_to_id[inner];
         const rank = bms[id] || null;
-        return rank ? { node, rank } : null;
+        const tooltipText = buildTooltipText('bms', bms_stats[id]);
+        return rank ? { node, rank, tooltipText } : null;
       }
     }
     return null;
@@ -136,7 +214,14 @@
     prefs = prefs || DEFAULT_PREFS;
     if (!prefs.sire && !prefs.bms) return;
 
-    const { sire = {}, bms = {}, sire_name_to_id = {}, bms_name_to_id = {} } = ranking;
+    const {
+      sire = {},
+      bms = {},
+      sire_stats = {},
+      bms_stats = {},
+      sire_name_to_id = {},
+      bms_name_to_id = {},
+    } = ranking;
     if (Object.keys(sire_name_to_id).length === 0 && Object.keys(bms_name_to_id).length === 0) {
       return;
     }
@@ -166,7 +251,16 @@
           p = p.parentNode;
         }
         if (skip) continue;
-        const result = processTextNode(subNode, sire, bms, sire_name_to_id, bms_name_to_id, prefs);
+        const result = processTextNode(
+          subNode,
+          sire,
+          bms,
+          sire_name_to_id,
+          bms_name_to_id,
+          sire_stats,
+          bms_stats,
+          prefs
+        );
         if (result) toProcess.push(result);
       }
     });
@@ -195,16 +289,25 @@
     );
     let node;
     while ((node = walker.nextNode())) {
-      const result = processTextNode(node, sire, bms, sire_name_to_id, bms_name_to_id, prefs);
+      const result = processTextNode(
+        node,
+        sire,
+        bms,
+        sire_name_to_id,
+        bms_name_to_id,
+        sire_stats,
+        bms_stats,
+        prefs
+      );
       if (result) toProcess.push(result);
     }
 
     // 重複を除去（同一ノードを複数回処理しない）
     const seen = new WeakSet();
-    toProcess.forEach(({ node, rank }) => {
+    toProcess.forEach(({ node, rank, tooltipText }) => {
       if (seen.has(node)) return;
       seen.add(node);
-      insertBadgeForTextNode(node, rank, false);
+      insertBadgeForTextNode(node, rank, false, tooltipText);
     });
   }
 

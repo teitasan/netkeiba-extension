@@ -9,49 +9,92 @@ const CONFIG = {
   jockey: {
     url: `${BASE}/jockey/jockey_leading_jra.html?year=2026`,
     linkPattern: /(?:db\.netkeiba\.com)?\/jockey\/[^"']*\/([0-9a-zA-Z]+)\/?/,
+    stats: {
+      win_rate: 18,
+      place_rate: 20,
+    },
   },
   trainer: {
     url: `${BASE}/?pid=trainer_leading&year=2026`,
     linkPattern: /(?:db\.netkeiba\.com)?\/trainer\/[^"']*\/([0-9a-zA-Z]+)\/?/,
+    stats: {
+      win_rate: 18,
+      place_rate: 20,
+    },
   },
   sire: {
     url: `${BASE}/?pid=sire_leading&year=2026`,
     linkPattern: /(?:db\.netkeiba\.com)?\/horse\/sire\/([0-9a-zA-Z]+)\/?/,
+    stats: {
+      win_horse_rate: 16,
+      ei: 17,
+    },
   },
   bms: {
     url: `${BASE}/?pid=bms_leading&year=2026`,
     linkPattern: /(?:db\.netkeiba\.com)?\/horse\/sire\/([0-9a-zA-Z]+)\/?/,
+    stats: {
+      win_horse_rate: 16,
+      ei: 17,
+    },
   },
 };
+
+function stripTags(html = '') {
+  return html
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function parseNumber(text = '') {
+  const normalized = text.replace(/,/g, '').trim();
+  if (!normalized || normalized === '-') return null;
+  const value = Number.parseFloat(
+    normalized.startsWith('.') ? `0${normalized}` : normalized
+  );
+  return Number.isFinite(value) ? value : null;
+}
 
 /**
  * 1ページ分のHTMLから、順位とIDのペアを抽出する
  * テーブル行を走査し、先頭列の順位と名前リンクのIDを対応させる
  * @param {string} html - ページのHTML
  * @param {string} category - jockey | trainer | sire | bms
- * @returns {Array<{rank:number, id:string}>}
+ * @returns {Array<{rank:number, id:string, name?:string, stats?:Object<string, number>}>}
  */
 function parsePage(html, category) {
-  const { linkPattern } = CONFIG[category];
+  const { linkPattern, stats: statIndexes = {} } = CONFIG[category];
   const results = [];
   const rows = html.match(/<tr[^>]*>[\s\S]*?<\/tr>/gi) || [];
 
   for (const row of rows) {
-    const rankMatch = row.match(/<td[^>]*>(\d+)<\/td>/);
-    const hrefMatch = row.match(/href="([^"]+)"/);
-    if (!rankMatch || !hrefMatch) continue;
+    const cells = [...row.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)].map((match) =>
+      stripTags(match[1])
+    );
+    if (cells.length === 0) continue;
 
-    const rank = parseInt(rankMatch[1], 10);
+    const rank = Number.parseInt(cells[0], 10);
+    const hrefMatch = row.match(/href="([^"]+)"/);
+    if (!Number.isFinite(rank) || !hrefMatch) continue;
     const idMatch = hrefMatch[1].match(linkPattern);
     if (!idMatch) continue;
 
     const id = idMatch[1];
     const entry = { rank, id };
-    // 種牡馬・BMS: リンクテキスト（名前）を抽出し、テキスト表示ページ用の名前→IDマップに利用
+    const stats = {};
+    for (const [key, index] of Object.entries(statIndexes)) {
+      const value = parseNumber(cells[index]);
+      if (value !== null) stats[key] = value;
+    }
+    if (Object.keys(stats).length > 0) {
+      entry.stats = stats;
+    }
+    // 種牡馬・BMS: 名前を抽出し、テキスト表示ページ用の名前→IDマップに利用
     if (category === 'sire' || category === 'bms') {
-      const linkTextMatch = row.match(/href="[^"]*"[^>]*>([^<]+)<\/a>/);
-      if (linkTextMatch) {
-        entry.name = linkTextMatch[1].trim();
+      if (cells[1]) {
+        entry.name = cells[1];
       }
     }
     results.push(entry);
@@ -72,6 +115,20 @@ function buildRankMap(entries) {
     if (!(id in map) || map[id] > rank) {
       map[id] = rank;
     }
+  }
+  return map;
+}
+
+/**
+ * 全ページを考慮してID→統計値のマップを構築する
+ * @param {Array<{id:string, stats?:Object<string, number>}>} entries
+ * @returns {Object<string, Object<string, number>>}
+ */
+function buildStatsMap(entries) {
+  const map = {};
+  for (const { id, stats } of entries) {
+    if (!stats || Object.keys(stats).length === 0) continue;
+    map[id] = stats;
   }
   return map;
 }
@@ -104,6 +161,7 @@ module.exports = {
   CONFIG,
   parsePage,
   buildRankMap,
+  buildStatsMap,
   buildNameToIdMap,
   getPageUrl,
 };

@@ -13,6 +13,7 @@ const {
   CONFIG,
   parsePage,
   buildRankMap,
+  buildStatsMap,
   buildNameToIdMap,
   getPageUrl,
 } = require('./lib/parse-ranking-pages');
@@ -58,12 +59,16 @@ async function scrapeCategory(category) {
   }
 
   const map = buildRankMap(entries);
-  console.log(`[${category}] ${Object.keys(map).length} 件取得`);
-  if (category === 'sire' || category === 'bms') {
-    const nameToId = buildNameToIdMap(entries);
-    return { rankMap: map, nameToId };
-  }
-  return map;
+  const statsMap = buildStatsMap(entries);
+  console.log(
+    `[${category}] 順位 ${Object.keys(map).length} 件 / 統計 ${Object.keys(statsMap).length} 件取得`
+  );
+  return {
+    rankMap: map,
+    statsMap,
+    nameToId:
+      category === 'sire' || category === 'bms' ? buildNameToIdMap(entries) : {},
+  };
 }
 
 async function main() {
@@ -71,7 +76,7 @@ async function main() {
   const jst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
   const updatedAt = jst.toISOString().replace(/\.\d{3}Z$/, '+09:00');
 
-  const [jockey, trainer, sireResult, bmsResult] = await Promise.all([
+  const [jockeyResult, trainerResult, sireResult, bmsResult] = await Promise.all([
     scrapeCategory('jockey'),
     scrapeCategory('trainer'),
     scrapeCategory('sire'),
@@ -80,10 +85,14 @@ async function main() {
 
   const output = {
     updated_at: updatedAt,
-    jockey,
-    trainer,
+    jockey: jockeyResult.rankMap,
+    trainer: trainerResult.rankMap,
     sire: sireResult.rankMap,
     bms: bmsResult.rankMap,
+    jockey_stats: jockeyResult.statsMap,
+    trainer_stats: trainerResult.statsMap,
+    sire_stats: sireResult.statsMap,
+    bms_stats: bmsResult.statsMap,
     sire_name_to_id: sireResult.nameToId,
     bms_name_to_id: bmsResult.nameToId,
   };

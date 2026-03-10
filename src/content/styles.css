@@ -22,3 +22,15 @@
   color: #222;
   line-height: 1;
 }
+
+.nk-ranking-badge.nk-rank-1 {
+  background-color: #fff081;
+}
+
+.nk-ranking-badge.nk-rank-2 {
+  background-color: #cce0ff;
+}
+
+.nk-ranking-badge.nk-rank-3 {
+  background-color: #efc89f;
+}
