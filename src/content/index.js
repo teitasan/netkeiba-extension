@@ -44,7 +44,7 @@
     if (!parent) return;
     const wrapper = document.createElement('span');
     wrapper.setAttribute(TEXT_BADGE_ATTR, '1');
-    wrapper.style.display = 'inline';
+    wrapper.style.color = '#222';
     wrapper.textContent = textNode.textContent;
     const badge = document.createElement('span');
     badge.setAttribute(BADGE_ATTR, '1');
@@ -54,47 +54,70 @@
     parent.replaceChild(wrapper, textNode);
   }
 
+  const DEFAULT_PREFS = { jockey: true, trainer: true, sire: true, bms: true };
+
+  function getPreferences() {
+    return new Promise((resolve) => {
+      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+        chrome.storage.local.get('preferences', ({ preferences }) => {
+          resolve({ ...DEFAULT_PREFS, ...preferences });
+        });
+      } else {
+        resolve(DEFAULT_PREFS);
+      }
+    });
+  }
+
   /**
    * 出馬表のDOMを走査し、該当リンクにバッジを挿入する
    */
-  function applyBadges(ranking) {
+  function applyBadges(ranking, prefs) {
     if (!ranking) return;
+    prefs = prefs || DEFAULT_PREFS;
 
     const { jockey = {}, trainer = {}, sire = {}, bms = {} } = ranking;
 
-    document.querySelectorAll(SELECTORS.jockey).forEach((a) => {
-      const id = extractIdFromHref(a.getAttribute('href'));
-      const rank = id ? jockey[id] : null;
-      if (rank) insertBadge(a, rank, true);
-    });
+    if (prefs.jockey) {
+      document.querySelectorAll(SELECTORS.jockey).forEach((a) => {
+        const id = extractIdFromHref(a.getAttribute('href'));
+        const rank = id ? jockey[id] : null;
+        if (rank) insertBadge(a, rank, true);
+      });
+    }
 
-    document.querySelectorAll(SELECTORS.trainer).forEach((a) => {
-      const id = extractIdFromHref(a.getAttribute('href'));
-      const rank = id ? trainer[id] : null;
-      if (rank) insertBadge(a, rank, true);
-    });
+    if (prefs.trainer) {
+      document.querySelectorAll(SELECTORS.trainer).forEach((a) => {
+        const id = extractIdFromHref(a.getAttribute('href'));
+        const rank = id ? trainer[id] : null;
+        if (rank) insertBadge(a, rank, true);
+      });
+    }
 
-    document.querySelectorAll(SELECTORS.sire).forEach((a) => {
-      const id = extractIdFromHref(a.getAttribute('href'));
-      if (!id) return;
-      const rank = sire[id] || bms[id];
-      if (rank) insertBadge(a, rank, false);
-    });
+    if (prefs.sire || prefs.bms) {
+      document.querySelectorAll(SELECTORS.sire).forEach((a) => {
+        const id = extractIdFromHref(a.getAttribute('href'));
+        if (!id) return;
+        const rank = prefs.sire ? sire[id] : null;
+        const bmsRank = prefs.bms ? bms[id] : null;
+        const r = rank || bmsRank;
+        if (r) insertBadge(a, r, false);
+      });
+    }
   }
 
   /**
    * テキストノードを処理してバッジを挿入
    */
-  function processTextNode(node, sire, bms, sire_name_to_id, bms_name_to_id) {
+  function processTextNode(node, sire, bms, sire_name_to_id, bms_name_to_id, prefs) {
     const text = node.textContent.trim();
     if (!text) return null;
 
-    if (sire_name_to_id[text]) {
+    if (prefs.sire && sire_name_to_id[text]) {
       const id = sire_name_to_id[text];
       const rank = sire[id] || null;
       return rank ? { node, rank } : null;
     }
-    if ((text.startsWith('(') && text.endsWith(')')) || (text.startsWith('（') && text.endsWith('）'))) {
+    if (prefs.bms && ((text.startsWith('(') && text.endsWith(')')) || (text.startsWith('（') && text.endsWith('）')))) {
       const inner = text.slice(1, -1).trim();
       if (bms_name_to_id[inner]) {
         const id = bms_name_to_id[inner];
@@ -108,8 +131,10 @@
   /**
    * リンクでない父・母父名（テキスト）の横にもバッジを挿入する（全ページ対象）
    */
-  function applyBadgesForTextNames(ranking) {
+  function applyBadgesForTextNames(ranking, prefs) {
     if (!ranking) return;
+    prefs = prefs || DEFAULT_PREFS;
+    if (!prefs.sire && !prefs.bms) return;
 
     const { sire = {}, bms = {}, sire_name_to_id = {}, bms_name_to_id = {} } = ranking;
     if (Object.keys(sire_name_to_id).length === 0 && Object.keys(bms_name_to_id).length === 0) {
@@ -141,7 +166,7 @@
           p = p.parentNode;
         }
         if (skip) continue;
-        const result = processTextNode(subNode, sire, bms, sire_name_to_id, bms_name_to_id);
+        const result = processTextNode(subNode, sire, bms, sire_name_to_id, bms_name_to_id, prefs);
         if (result) toProcess.push(result);
       }
     });
@@ -170,7 +195,7 @@
     );
     let node;
     while ((node = walker.nextNode())) {
-      const result = processTextNode(node, sire, bms, sire_name_to_id, bms_name_to_id);
+      const result = processTextNode(node, sire, bms, sire_name_to_id, bms_name_to_id, prefs);
       if (result) toProcess.push(result);
     }
 
@@ -184,22 +209,36 @@
   }
 
   let rankingCache = null;
+  let prefsCache = null;
 
-  function run(ranking) {
+  function removeBadges() {
+    document.querySelectorAll(`[${BADGE_ATTR}]`).forEach((el) => el.remove());
+    document.querySelectorAll(`[${TEXT_BADGE_ATTR}]`).forEach((wrapper) => {
+      const parent = wrapper.parentNode;
+      if (!parent) return;
+      const textNode = document.createTextNode(wrapper.childNodes[0]?.textContent || '');
+      parent.replaceChild(textNode, wrapper);
+    });
+  }
+
+  function run(ranking, prefs, shouldRemoveFirst = false) {
     if (!ranking) return;
-    applyBadges(ranking);
-    applyBadgesForTextNames(ranking);
+    prefs = prefs || DEFAULT_PREFS;
+    if (shouldRemoveFirst) removeBadges();
+    applyBadges(ranking, prefs);
+    applyBadgesForTextNames(ranking, prefs);
   }
 
   async function main() {
     try {
-      const ranking = await fetchRanking();
+      const [ranking, prefs] = await Promise.all([fetchRanking(), getPreferences()]);
       rankingCache = ranking;
-      run(ranking);
+      prefsCache = prefs;
+      run(ranking, prefs);
 
       // 動的読み込み対応: 少し遅れて再実行
-      setTimeout(() => run(ranking), 800);
-      setTimeout(() => run(ranking), 2000);
+      setTimeout(() => run(ranking, prefs), 800);
+      setTimeout(() => run(ranking, prefs), 2000);
 
       // DOM 変更を監視して再実行（馬柱など遅延読み込み対応）
       let debounceTimer = null;
@@ -208,9 +247,19 @@
         if (debounceTimer) clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
           debounceTimer = null;
-          run(rankingCache);
+          run(rankingCache, prefsCache);
         }, 300);
       });
+
+      // 設定変更時に再実行（ポップアップでチェックを変えた場合）
+      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.onChanged) {
+        chrome.storage.onChanged.addListener((changes, area) => {
+          if (area === 'local' && changes.preferences) {
+            prefsCache = { ...DEFAULT_PREFS, ...changes.preferences.newValue };
+            if (rankingCache) run(rankingCache, prefsCache, true);
+          }
+        });
+      }
       observer.observe(document.body, {
         childList: true,
         subtree: true,

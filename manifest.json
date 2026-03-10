@@ -3,7 +3,11 @@
   "name": "netkeiba-extension リーディング表示",
   "version": "1.0.0",
   "description": "出馬表に騎手・調教師・種牡馬・BMSの全国リーディング順位を表示します",
-  "permissions": [],
+  "permissions": ["storage"],
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_title": "表示設定"
+  },
   "content_scripts": [
     {
       "matches": [

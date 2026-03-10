@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      width: 200px;
+      padding: 12px 16px;
+      font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+      font-size: 13px;
+    }
+    .section {
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 10px 12px;
+    }
+    .section-title {
+      margin: 0 0 8px 0;
+      font-size: 12px;
+      font-weight: 600;
+      color: #333;
+    }
+    label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 0;
+      cursor: pointer;
+    }
+    input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="section">
+    <h3 class="section-title">リーディング順位</h3>
+    <label><input type="checkbox" id="jockey" checked> 騎手</label>
+    <label><input type="checkbox" id="trainer" checked> 調教師</label>
+    <label><input type="checkbox" id="sire" checked> 種牡馬</label>
+    <label><input type="checkbox" id="bms" checked> 母父（BMS）</label>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

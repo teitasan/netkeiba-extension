@@ -1,45 +1,24 @@
-/* netkeiba リーディング順位バッジ */
+/* netkeiba リーディング順位バッジ（視認性重視・単一スタイル） */
+
+/* 父・母父名をラップする span：ページの #9c9fa6 等を上書き */
+[data-nk-text-badge] {
+  display: inline-flex;
+  align-items: center;
+  color: #222 !important;
+}
 
 .nk-ranking-badge {
-  display: inline-block;
-  min-width: 1.2em;
-  padding: 0 0.25em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.4em;
+  height: 1.3em;
+  padding: 0 0.2em;
   margin-left: 0.25em;
-  font-size: 0.85em;
-  font-weight: bold;
-  text-align: center;
-  border-radius: 3px;
+  font-size: 1em;
+  border-radius: 2px;
   vertical-align: middle;
-}
-
-/* 騎手・調教師系（人） */
-.nk-ranking-badge.nk-badge-person {
-  background-color: #e3f2fd;
-  color: #1565c0;
-}
-
-.nk-ranking-badge.nk-badge-person.nk-top5 {
-  background-color: #1565c0;
-  color: #fff;
-}
-
-.nk-ranking-badge.nk-badge-person.nk-top10 {
-  background-color: #42a5f5;
-  color: #fff;
-}
-
-/* 種牡馬・BMS系（血統） */
-.nk-ranking-badge.nk-badge-sire {
-  background-color: #f3e5f5;
-  color: #7b1fa2;
-}
-
-.nk-ranking-badge.nk-badge-sire.nk-top5 {
-  background-color: #7b1fa2;
-  color: #fff;
-}
-
-.nk-ranking-badge.nk-badge-sire.nk-top10 {
-  background-color: #ab47bc;
-  color: #fff;
+  background-color: #f4f2ec;
+  color: #222;
+  line-height: 1;
 }
