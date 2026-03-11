@@ -57,7 +57,7 @@
 
   function applyTooltip(el, tooltipText) {
     if (!el || !tooltipText) return;
-    el.title = tooltipText;
+    el.setAttribute('data-nk-tooltip', tooltipText);
     el.setAttribute('aria-label', tooltipText);
   }
 
