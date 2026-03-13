@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-03-10T16:14:09+09:00",
+  "updated_at": "2026-03-13T19:13:15+09:00",
   "jockey": {
     "05339": 1,
     "01174": 2,
@@ -6870,6 +6870,857 @@
       "win_horse_rate": 0,
       "ei": 0
     }
+  },
+  "jockey_totals": {
+    "05339": {
+      "wins": 37,
+      "seconds": 24,
+      "thirds": 20,
+      "others": 46
+    },
+    "01174": {
+      "wins": 29,
+      "seconds": 24,
+      "thirds": 14,
+      "others": 95
+    },
+    "01126": {
+      "wins": 28,
+      "seconds": 20,
+      "thirds": 20,
+      "others": 107
+    },
+    "01088": {
+      "wins": 27,
+      "seconds": 21,
+      "thirds": 4,
+      "others": 44
+    },
+    "01171": {
+      "wins": 27,
+      "seconds": 19,
+      "thirds": 20,
+      "others": 99
+    },
+    "01170": {
+      "wins": 20,
+      "seconds": 16,
+      "thirds": 19,
+      "others": 95
+    },
+    "05386": {
+      "wins": 19,
+      "seconds": 25,
+      "thirds": 22,
+      "others": 72
+    },
+    "01091": {
+      "wins": 18,
+      "seconds": 20,
+      "thirds": 15,
+      "others": 135
+    },
+    "01163": {
+      "wins": 17,
+      "seconds": 16,
+      "thirds": 14,
+      "others": 66
+    },
+    "05643": {
+      "wins": 16,
+      "seconds": 10,
+      "thirds": 8,
+      "others": 42
+    },
+    "01157": {
+      "wins": 15,
+      "seconds": 7,
+      "thirds": 8,
+      "others": 111
+    },
+    "00666": {
+      "wins": 14,
+      "seconds": 14,
+      "thirds": 19,
+      "others": 75
+    },
+    "01160": {
+      "wins": 14,
+      "seconds": 12,
+      "thirds": 18,
+      "others": 103
+    },
+    "01092": {
+      "wins": 14,
+      "seconds": 12,
+      "thirds": 12,
+      "others": 89
+    },
+    "01140": {
+      "wins": 14,
+      "seconds": 4,
+      "thirds": 13,
+      "others": 77
+    },
+    "01178": {
+      "wins": 13,
+      "seconds": 2,
+      "thirds": 9,
+      "others": 101
+    },
+    "01200": {
+      "wins": 12,
+      "seconds": 6,
+      "thirds": 6,
+      "others": 59
+    },
+    "01102": {
+      "wins": 10,
+      "seconds": 20,
+      "thirds": 13,
+      "others": 85
+    },
+    "01154": {
+      "wins": 10,
+      "seconds": 8,
+      "thirds": 13,
+      "others": 106
+    },
+    "01122": {
+      "wins": 10,
+      "seconds": 5,
+      "thirds": 8,
+      "others": 89
+    },
+    "01197": {
+      "wins": 9,
+      "seconds": 17,
+      "thirds": 5,
+      "others": 135
+    },
+    "01213": {
+      "wins": 9,
+      "seconds": 16,
+      "thirds": 15,
+      "others": 123
+    },
+    "05676": {
+      "wins": 9,
+      "seconds": 10,
+      "thirds": 5,
+      "others": 87
+    },
+    "01179": {
+      "wins": 9,
+      "seconds": 9,
+      "thirds": 18,
+      "others": 89
+    },
+    "01216": {
+      "wins": 8,
+      "seconds": 14,
+      "thirds": 18,
+      "others": 143
+    },
+    "01032": {
+      "wins": 8,
+      "seconds": 7,
+      "thirds": 9,
+      "others": 82
+    },
+    "01208": {
+      "wins": 8,
+      "seconds": 6,
+      "thirds": 16,
+      "others": 117
+    },
+    "01192": {
+      "wins": 8,
+      "seconds": 5,
+      "thirds": 8,
+      "others": 84
+    },
+    "01161": {
+      "wins": 7,
+      "seconds": 10,
+      "thirds": 6,
+      "others": 126
+    },
+    "01093": {
+      "wins": 7,
+      "seconds": 7,
+      "thirds": 8,
+      "others": 34
+    },
+    "01144": {
+      "wins": 7,
+      "seconds": 6,
+      "thirds": 7,
+      "others": 86
+    },
+    "01220": {
+      "wins": 7,
+      "seconds": 5,
+      "thirds": 5,
+      "others": 110
+    },
+    "01221": {
+      "wins": 6,
+      "seconds": 6,
+      "thirds": 9,
+      "others": 79
+    },
+    "01095": {
+      "wins": 6,
+      "seconds": 5,
+      "thirds": 5,
+      "others": 33
+    },
+    "01034": {
+      "wins": 6,
+      "seconds": 3,
+      "thirds": 2,
+      "others": 88
+    },
+    "01150": {
+      "wins": 6,
+      "seconds": 2,
+      "thirds": 3,
+      "others": 61
+    },
+    "01180": {
+      "wins": 5,
+      "seconds": 16,
+      "thirds": 13,
+      "others": 125
+    },
+    "01162": {
+      "wins": 5,
+      "seconds": 10,
+      "thirds": 3,
+      "others": 104
+    },
+    "00732": {
+      "wins": 5,
+      "seconds": 9,
+      "thirds": 6,
+      "others": 75
+    },
+    "05203": {
+      "wins": 5,
+      "seconds": 7,
+      "thirds": 8,
+      "others": 98
+    },
+    "01075": {
+      "wins": 5,
+      "seconds": 2,
+      "thirds": 8,
+      "others": 60
+    },
+    "01206": {
+      "wins": 5,
+      "seconds": 1,
+      "thirds": 3,
+      "others": 56
+    },
+    "01168": {
+      "wins": 4,
+      "seconds": 10,
+      "thirds": 8,
+      "others": 58
+    },
+    "01184": {
+      "wins": 4,
+      "seconds": 9,
+      "thirds": 5,
+      "others": 116
+    },
+    "01115": {
+      "wins": 4,
+      "seconds": 8,
+      "thirds": 5,
+      "others": 57
+    },
+    "01127": {
+      "wins": 4,
+      "seconds": 7,
+      "thirds": 11,
+      "others": 66
+    },
+    "00660": {
+      "wins": 4,
+      "seconds": 6,
+      "thirds": 4,
+      "others": 41
+    },
+    "01185": {
+      "wins": 4,
+      "seconds": 2,
+      "thirds": 2,
+      "others": 77
+    },
+    "01135": {
+      "wins": 4,
+      "seconds": 1,
+      "thirds": 3,
+      "others": 60
+    },
+    "01015": {
+      "wins": 4,
+      "seconds": 1,
+      "thirds": 2,
+      "others": 81
+    },
+    "01186": {
+      "wins": 3,
+      "seconds": 7,
+      "thirds": 7,
+      "others": 47
+    },
+    "01209": {
+      "wins": 3,
+      "seconds": 6,
+      "thirds": 4,
+      "others": 65
+    },
+    "01138": {
+      "wins": 3,
+      "seconds": 5,
+      "thirds": 4,
+      "others": 72
+    },
+    "00641": {
+      "wins": 3,
+      "seconds": 3,
+      "thirds": 1,
+      "others": 35
+    },
+    "01085": {
+      "wins": 3,
+      "seconds": 2,
+      "thirds": 5,
+      "others": 62
+    },
+    "01066": {
+      "wins": 3,
+      "seconds": 2,
+      "thirds": 1,
+      "others": 13
+    },
+    "01152": {
+      "wins": 3,
+      "seconds": 1,
+      "thirds": 7,
+      "others": 70
+    },
+    "01196": {
+      "wins": 3,
+      "seconds": 1,
+      "thirds": 2,
+      "others": 13
+    },
+    "01087": {
+      "wins": 3,
+      "seconds": 1,
+      "thirds": 0,
+      "others": 21
+    },
+    "01223": {
+      "wins": 3,
+      "seconds": 0,
+      "thirds": 4,
+      "others": 71
+    },
+    "01214": {
+      "wins": 2,
+      "seconds": 6,
+      "thirds": 5,
+      "others": 117
+    },
+    "01190": {
+      "wins": 2,
+      "seconds": 4,
+      "thirds": 3,
+      "others": 57
+    },
+    "01037": {
+      "wins": 2,
+      "seconds": 3,
+      "thirds": 4,
+      "others": 43
+    },
+    "01203": {
+      "wins": 2,
+      "seconds": 3,
+      "thirds": 3,
+      "others": 74
+    },
+    "01141": {
+      "wins": 2,
+      "seconds": 3,
+      "thirds": 0,
+      "others": 40
+    },
+    "00733": {
+      "wins": 2,
+      "seconds": 2,
+      "thirds": 3,
+      "others": 59
+    },
+    "01193": {
+      "wins": 2,
+      "seconds": 2,
+      "thirds": 3,
+      "others": 42
+    },
+    "01212": {
+      "wins": 2,
+      "seconds": 2,
+      "thirds": 1,
+      "others": 61
+    },
+    "01222": {
+      "wins": 2,
+      "seconds": 2,
+      "thirds": 1,
+      "others": 51
+    },
+    "01046": {
+      "wins": 2,
+      "seconds": 2,
+      "thirds": 1,
+      "others": 7
+    },
+    "01059": {
+      "wins": 2,
+      "seconds": 1,
+      "thirds": 4,
+      "others": 17
+    },
+    "01207": {
+      "wins": 2,
+      "seconds": 1,
+      "thirds": 0,
+      "others": 53
+    },
+    "01169": {
+      "wins": 2,
+      "seconds": 0,
+      "thirds": 3,
+      "others": 52
+    },
+    "01143": {
+      "wins": 2,
+      "seconds": 0,
+      "thirds": 1,
+      "others": 40
+    },
+    "01215": {
+      "wins": 2,
+      "seconds": 0,
+      "thirds": 0,
+      "others": 23
+    },
+    "01096": {
+      "wins": 1,
+      "seconds": 6,
+      "thirds": 4,
+      "others": 87
+    },
+    "01124": {
+      "wins": 1,
+      "seconds": 5,
+      "thirds": 5,
+      "others": 53
+    },
+    "00689": {
+      "wins": 1,
+      "seconds": 5,
+      "thirds": 1,
+      "others": 61
+    },
+    "01217": {
+      "wins": 1,
+      "seconds": 4,
+      "thirds": 7,
+      "others": 66
+    },
+    "01181": {
+      "wins": 1,
+      "seconds": 4,
+      "thirds": 5,
+      "others": 50
+    },
+    "01149": {
+      "wins": 1,
+      "seconds": 3,
+      "thirds": 2,
+      "others": 16
+    },
+    "01009": {
+      "wins": 1,
+      "seconds": 3,
+      "thirds": 0,
+      "others": 64
+    },
+    "01153": {
+      "wins": 1,
+      "seconds": 3,
+      "thirds": 0,
+      "others": 31
+    },
+    "01101": {
+      "wins": 1,
+      "seconds": 3,
+      "thirds": 0,
+      "others": 7
+    },
+    "01191": {
+      "wins": 1,
+      "seconds": 2,
+      "thirds": 4,
+      "others": 66
+    },
+    "01202": {
+      "wins": 1,
+      "seconds": 2,
+      "thirds": 3,
+      "others": 36
+    },
+    "01099": {
+      "wins": 1,
+      "seconds": 2,
+      "thirds": 3,
+      "others": 17
+    },
+    "01218": {
+      "wins": 1,
+      "seconds": 2,
+      "thirds": 2,
+      "others": 71
+    },
+    "01077": {
+      "wins": 1,
+      "seconds": 2,
+      "thirds": 2,
+      "others": 47
+    },
+    "01130": {
+      "wins": 1,
+      "seconds": 2,
+      "thirds": 2,
+      "others": 40
+    },
+    "01187": {
+      "wins": 1,
+      "seconds": 2,
+      "thirds": 1,
+      "others": 58
+    },
+    "01142": {
+      "wins": 1,
+      "seconds": 2,
+      "thirds": 1,
+      "others": 41
+    },
+    "01158": {
+      "wins": 1,
+      "seconds": 2,
+      "thirds": 0,
+      "others": 46
+    },
+    "01211": {
+      "wins": 1,
+      "seconds": 2,
+      "thirds": 0,
+      "others": 14
+    },
+    "01113": {
+      "wins": 1,
+      "seconds": 1,
+      "thirds": 5,
+      "others": 12
+    },
+    "01125": {
+      "wins": 1,
+      "seconds": 1,
+      "thirds": 4,
+      "others": 87
+    },
+    "01069": {
+      "wins": 1,
+      "seconds": 1,
+      "thirds": 3,
+      "others": 9
+    },
+    "01204": {
+      "wins": 1,
+      "seconds": 1,
+      "thirds": 2,
+      "others": 55
+    },
+    "01120": {
+      "wins": 1,
+      "seconds": 1,
+      "thirds": 2,
+      "others": 15
+    },
+    "01176": {
+      "wins": 1,
+      "seconds": 1,
+      "thirds": 1,
+      "others": 54
+    },
+    "01109": {
+      "wins": 1,
+      "seconds": 1,
+      "thirds": 1,
+      "others": 37
+    },
+    "01151": {
+      "wins": 1,
+      "seconds": 1,
+      "thirds": 1,
+      "others": 11
+    },
+    "01123": {
+      "wins": 1,
+      "seconds": 1,
+      "thirds": 0,
+      "others": 19
+    },
+    "01198": {
+      "wins": 1,
+      "seconds": 1,
+      "thirds": 0,
+      "others": 6
+    },
+    "01043": {
+      "wins": 1,
+      "seconds": 0,
+      "thirds": 1,
+      "others": 13
+    },
+    "01072": {
+      "wins": 1,
+      "seconds": 0,
+      "thirds": 1,
+      "others": 12
+    },
+    "01139": {
+      "wins": 1,
+      "seconds": 0,
+      "thirds": 1,
+      "others": 12
+    },
+    "01117": {
+      "wins": 1,
+      "seconds": 0,
+      "thirds": 0,
+      "others": 53
+    },
+    "01166": {
+      "wins": 1,
+      "seconds": 0,
+      "thirds": 0,
+      "others": 43
+    },
+    "05380": {
+      "wins": 1,
+      "seconds": 0,
+      "thirds": 0,
+      "others": 14
+    },
+    "01005": {
+      "wins": 1,
+      "seconds": 0,
+      "thirds": 0,
+      "others": 2
+    },
+    "00422": {
+      "wins": 0,
+      "seconds": 3,
+      "thirds": 3,
+      "others": 23
+    },
+    "01201": {
+      "wins": 0,
+      "seconds": 3,
+      "thirds": 1,
+      "others": 40
+    },
+    "01195": {
+      "wins": 0,
+      "seconds": 2,
+      "thirds": 1,
+      "others": 47
+    },
+    "01177": {
+      "wins": 0,
+      "seconds": 2,
+      "thirds": 0,
+      "others": 26
+    },
+    "01134": {
+      "wins": 0,
+      "seconds": 1,
+      "thirds": 1,
+      "others": 34
+    },
+    "01183": {
+      "wins": 0,
+      "seconds": 1,
+      "thirds": 0,
+      "others": 33
+    },
+    "01156": {
+      "wins": 0,
+      "seconds": 1,
+      "thirds": 0,
+      "others": 19
+    },
+    "00726": {
+      "wins": 0,
+      "seconds": 1,
+      "thirds": 0,
+      "others": 15
+    },
+    "01182": {
+      "wins": 0,
+      "seconds": 1,
+      "thirds": 0,
+      "others": 10
+    },
+    "01052": {
+      "wins": 0,
+      "seconds": 1,
+      "thirds": 0,
+      "others": 4
+    },
+    "01063": {
+      "wins": 0,
+      "seconds": 1,
+      "thirds": 0,
+      "others": 1
+    },
+    "01112": {
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 2,
+      "others": 26
+    },
+    "01018": {
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 2,
+      "others": 15
+    },
+    "01147": {
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 1,
+      "others": 26
+    },
+    "01167": {
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 1,
+      "others": 25
+    },
+    "05609": {
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 1,
+      "others": 6
+    },
+    "05429": {
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 1,
+      "others": 4
+    },
+    "05328": {
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 1,
+      "others": 2
+    },
+    "01194": {
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0,
+      "others": 28
+    },
+    "01219": {
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0,
+      "others": 15
+    },
+    "01129": {
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0,
+      "others": 11
+    },
+    "01108": {
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0,
+      "others": 11
+    },
+    "01119": {
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0,
+      "others": 10
+    },
+    "01023": {
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0,
+      "others": 6
+    },
+    "01105": {
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0,
+      "others": 6
+    },
+    "01131": {
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0,
+      "others": 5
+    },
+    "05690": {
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0,
+      "others": 4
+    },
+    "05562": {
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0,
+      "others": 2
+    },
+    "05053": {
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0,
+      "others": 1
+    }
+  },
+  "jockey_weekly_stats": {},
+  "jockey_weekly_highlights": {},
+  "weekly_meta": {
+    "min_rides": 10,
+    "top_n": 3,
+    "has_previous": true,
+    "previous_updated_at": "2026-03-13T19:11:23+09:00",
+    "comparison_label": "前回更新後"
   },
   "sire_name_to_id": {
     "キズナ": "2010105827",

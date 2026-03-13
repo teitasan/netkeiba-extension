@@ -8,6 +8,7 @@
 (function () {
   const BADGE_ATTR = 'data-nk-ranking-badge';
   const TEXT_BADGE_ATTR = 'data-nk-text-badge';
+  const WEEKLY_ICON_ATTR = 'data-nk-weekly-icon';
   const SELECTORS = {
     jockey: 'a[href*="db.netkeiba.com/jockey/"]',
     trainer: 'a[href*="db.netkeiba.com/trainer/"]',
@@ -61,6 +62,16 @@
     el.setAttribute('aria-label', tooltipText);
   }
 
+  function buildWeeklyTooltip(labelPrefix, stats, highlight) {
+    if (!stats) return '';
+    const lines = [`${labelPrefix}成績`];
+    lines.push(`1着: ${stats.wins}`);
+    lines.push(`2着: ${stats.seconds}`);
+    lines.push(`3着: ${stats.thirds}`);
+    lines.push(`着外: ${stats.others}`);
+    return lines.join('\n');
+  }
+
   function detectPedigreeCategory(anchor, id, sire, bms, prefs) {
     const hasSire = Boolean(prefs.sire && sire[id]);
     const hasBms = Boolean(prefs.bms && bms[id]);
@@ -87,6 +98,21 @@
     span.className = getRankClass(rank, isPerson);
     span.textContent = String(rank);
     applyTooltip(span, tooltipText);
+    anchor.appendChild(span);
+  }
+
+  function insertWeeklyIcon(anchor, weeklyStats, highlight, labelPrefix) {
+    if (!anchor || !highlight || (!highlight.win_rate_rank && !highlight.place_rate_rank)) return;
+    if (anchor.querySelector(`[${WEEKLY_ICON_ATTR}]`)) return;
+
+    const span = document.createElement('span');
+    span.setAttribute(WEEKLY_ICON_ATTR, '1');
+    span.className = 'nk-weekly-icon';
+    span.textContent = '🔥';
+    applyTooltip(
+      span,
+      buildWeeklyTooltip(labelPrefix || '前回更新後', weeklyStats, highlight)
+    );
     anchor.appendChild(span);
   }
 
@@ -136,6 +162,9 @@
       sire = {},
       bms = {},
       jockey_stats = {},
+      jockey_weekly_stats = {},
+      jockey_weekly_highlights = {},
+      weekly_meta = {},
       trainer_stats = {},
       sire_stats = {},
       bms_stats = {},
@@ -146,7 +175,11 @@
         const id = extractIdFromHref(a.getAttribute('href'));
         const rank = id ? jockey[id] : null;
         const tooltipText = id ? buildTooltipText('jockey', jockey_stats[id]) : '';
+        const weeklyStats = id ? jockey_weekly_stats[id] : null;
+        const weeklyHighlight = id ? jockey_weekly_highlights[id] : null;
+        const comparisonLabel = weekly_meta.comparison_label || '前回更新後';
         if (rank) insertBadge(a, rank, true, tooltipText);
+        insertWeeklyIcon(a, weeklyStats, weeklyHighlight, comparisonLabel);
       });
     }
 
@@ -316,6 +349,7 @@
 
   function removeBadges() {
     document.querySelectorAll(`[${BADGE_ATTR}]`).forEach((el) => el.remove());
+    document.querySelectorAll(`[${WEEKLY_ICON_ATTR}]`).forEach((el) => el.remove());
     document.querySelectorAll(`[${TEXT_BADGE_ATTR}]`).forEach((wrapper) => {
       const parent = wrapper.parentNode;
       if (!parent) return;

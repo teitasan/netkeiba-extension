@@ -13,6 +13,12 @@ const CONFIG = {
       win_rate: 18,
       place_rate: 20,
     },
+    totals: {
+      wins: 4,
+      seconds: 5,
+      thirds: 6,
+      others: 7,
+    },
   },
   trainer: {
     url: `${BASE}/?pid=trainer_leading&year=2026`,
@@ -65,7 +71,7 @@ function parseNumber(text = '') {
  * @returns {Array<{rank:number, id:string, name?:string, stats?:Object<string, number>}>}
  */
 function parsePage(html, category) {
-  const { linkPattern, stats: statIndexes = {} } = CONFIG[category];
+  const { linkPattern, stats: statIndexes = {}, totals: totalIndexes = {} } = CONFIG[category];
   const results = [];
   const rows = html.match(/<tr[^>]*>[\s\S]*?<\/tr>/gi) || [];
 
@@ -84,12 +90,20 @@ function parsePage(html, category) {
     const id = idMatch[1];
     const entry = { rank, id };
     const stats = {};
+    const totals = {};
     for (const [key, index] of Object.entries(statIndexes)) {
       const value = parseNumber(cells[index]);
       if (value !== null) stats[key] = value;
     }
+    for (const [key, index] of Object.entries(totalIndexes)) {
+      const value = parseNumber(cells[index]);
+      if (value !== null) totals[key] = value;
+    }
     if (Object.keys(stats).length > 0) {
       entry.stats = stats;
+    }
+    if (Object.keys(totals).length > 0) {
+      entry.totals = totals;
     }
     // 種牡馬・BMS: 名前を抽出し、テキスト表示ページ用の名前→IDマップに利用
     if (category === 'sire' || category === 'bms') {
@@ -134,6 +148,20 @@ function buildStatsMap(entries) {
 }
 
 /**
+ * 全ページを考慮してID→累計件数のマップを構築する
+ * @param {Array<{id:string, totals?:Object<string, number>}>} entries
+ * @returns {Object<string, Object<string, number>>}
+ */
+function buildTotalsMap(entries) {
+  const map = {};
+  for (const { id, totals } of entries) {
+    if (!totals || Object.keys(totals).length === 0) continue;
+    map[id] = totals;
+  }
+  return map;
+}
+
+/**
  * 種牡馬・BMS用: 名前→IDのマップを構築する（テキスト表示ページで順位表示に利用）
  * @param {Array<{id:string, name?:string}>} entries
  * @returns {Object<string, string>}
@@ -162,6 +190,7 @@ module.exports = {
   parsePage,
   buildRankMap,
   buildStatsMap,
+  buildTotalsMap,
   buildNameToIdMap,
   getPageUrl,
 };

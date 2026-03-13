@@ -17,9 +17,10 @@
   padding: 0 0.2em;
   margin-left: 0.25em;
   font-size: 1em;
-  border-radius: 2px;
+  font-weight: bold;
+  border: 1px solid #b2b2b2;
   vertical-align: middle;
-  background-color: #f4f2ec;
+  background-color: #e4ebf1;
   color: #222;
   line-height: 1;
   cursor: default;
@@ -70,12 +71,74 @@
 
 .nk-ranking-badge.nk-rank-1 {
   background-color: #fff081;
+  border-color: #ccb834;
 }
 
 .nk-ranking-badge.nk-rank-2 {
   background-color: #cce0ff;
+  border-color: #6aaccd;
 }
 
 .nk-ranking-badge.nk-rank-3 {
-  background-color: #efc89f;
+  background-color: #ffd4d4;
+  border-color: #ff9494;
+}
+
+.nk-ranking-badge:not(.nk-rank-1):not(.nk-rank-2):not(.nk-rank-3) {
+  border-color: #b2b2b2;
+}
+
+.nk-weekly-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 0.25em;
+  font-size: 0.95em;
+  line-height: 1;
+  cursor: default;
+  filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.12));
+}
+
+.nk-weekly-icon[data-nk-tooltip]::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 2px);
+  transform: translateX(-50%);
+  border-width: 5px 5px 0 5px;
+  border-style: solid;
+  border-color: rgba(34, 34, 34, 0.94) transparent transparent transparent;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+  z-index: 2147483646;
+}
+
+.nk-weekly-icon[data-nk-tooltip]::after {
+  content: attr(data-nk-tooltip);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 7px);
+  transform: translateX(-50%);
+  min-width: max-content;
+  max-width: 14em;
+  padding: 0.45em 0.55em;
+  border-radius: 4px;
+  background-color: rgba(34, 34, 34, 0.94);
+  color: #fff;
+  font-size: 12px;
+  line-height: 1.45;
+  white-space: pre-line;
+  text-align: left;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.16);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+  z-index: 2147483647;
+}
+
+.nk-weekly-icon[data-nk-tooltip]:hover::before,
+.nk-weekly-icon[data-nk-tooltip]:hover::after {
+  opacity: 1;
 }

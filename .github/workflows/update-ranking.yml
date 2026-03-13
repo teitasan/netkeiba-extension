@@ -32,8 +32,15 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Download previous ranking snapshot
+        run: curl -fsSL "$PREVIOUS_RANKING_URL" -o /tmp/previous-ranking.json || true
+        env:
+          PREVIOUS_RANKING_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/ranking.json
+
       - name: Generate ranking.json
         run: node scripts/scrape-rankings.js
+        env:
+          PREVIOUS_RANKING_FILE: /tmp/previous-ranking.json
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
