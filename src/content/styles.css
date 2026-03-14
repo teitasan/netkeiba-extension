@@ -142,3 +142,63 @@
 .nk-weekly-icon[data-nk-tooltip]:hover::after {
   opacity: 1;
 }
+
+table.RaceTable01.ShutubaTable tr.Header th[data-nk-ranking-sort].sort_common {
+  padding: 2px;
+  vertical-align: bottom;
+  pointer-events: none;
+}
+
+table.RaceTable01.ShutubaTable th[data-nk-ranking-sort] .sort_icon {
+  display: block !important;
+  background: #e2e0da;
+  border-bottom: 1px solid #cac7c0;
+  text-align: center;
+  min-width: 22px;
+  height: 10px;
+  width: 40px;
+  margin-top: 6px;
+  pointer-events: auto;
+  line-height: 1;
+  font-size: 0;
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  cursor: pointer;
+}
+
+table.RaceTable01.ShutubaTable th[data-nk-ranking-sort] .sort_icon i {
+  display: none;
+}
+
+table.RaceTable01.ShutubaTable th[data-nk-ranking-sort] .sort_icon::after {
+  content: " ";
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-left: 1px solid #454545;
+  border-top: 1px solid #454545;
+  transform: translate(-50%, -58%) rotateZ(225deg);
+}
+
+table.RaceTable01.ShutubaTable th[data-nk-ranking-sort].tablesorter-headerDesc .sort_icon,
+table.RaceTable01.ShutubaTable th[data-nk-ranking-sort].tablesorter-headerAsc .sort_icon {
+  border-top: 1px solid #9e9b92;
+  border-bottom: none;
+  background: #bdbab2;
+}
+
+table.RaceTable01.ShutubaTable th[data-nk-ranking-sort].tablesorter-headerDesc .sort_icon::after {
+  border-left: 1px solid #93918c;
+  border-top: 1px solid #93918c;
+}
+
+table.RaceTable01.ShutubaTable th[data-nk-ranking-sort].tablesorter-headerAsc .sort_icon::after {
+  transform: translate(-50%, -42%) rotateZ(45deg);
+  border-left: 1px solid #93918c;
+  border-top: 1px solid #93918c;
+}

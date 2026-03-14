@@ -9,6 +9,11 @@
   const BADGE_ATTR = 'data-nk-ranking-badge';
   const TEXT_BADGE_ATTR = 'data-nk-text-badge';
   const WEEKLY_ICON_ATTR = 'data-nk-weekly-icon';
+  const SORT_HEADER_ATTR = 'data-nk-ranking-sort';
+  const SORT_BUTTON_ATTR = 'data-nk-ranking-sort-button';
+  const SORT_DIRECTION_ATTR = 'data-nk-ranking-sort-direction';
+  const SORT_BOUND_ATTR = 'data-nk-ranking-sort-bound';
+  const SORT_MISSING_RANK = 999999;
   const SELECTORS = {
     jockey: 'a[href*="db.netkeiba.com/jockey/"]',
     trainer: 'a[href*="db.netkeiba.com/trainer/"]',
@@ -60,6 +65,174 @@
     if (!el || !tooltipText) return;
     el.setAttribute('data-nk-tooltip', tooltipText);
     el.setAttribute('aria-label', tooltipText);
+  }
+
+  function getSortRank(rankMap, id) {
+    if (!id || !rankMap) return SORT_MISSING_RANK;
+    const rank = rankMap[id];
+    return Number.isFinite(rank) ? rank : SORT_MISSING_RANK;
+  }
+
+  function compareHorseRows(leftRow, rightRow, key, direction) {
+    const leftValue = Number(leftRow.getAttribute(`data-nk-sort-${key}`) || SORT_MISSING_RANK);
+    const rightValue = Number(rightRow.getAttribute(`data-nk-sort-${key}`) || SORT_MISSING_RANK);
+
+    if (leftValue !== rightValue) {
+      return direction === 'asc' ? leftValue - rightValue : rightValue - leftValue;
+    }
+
+    const leftUmaban = Number(leftRow.querySelector('td[class^="Umaban"]')?.textContent || '0');
+    const rightUmaban = Number(rightRow.querySelector('td[class^="Umaban"]')?.textContent || '0');
+    return leftUmaban - rightUmaban;
+  }
+
+  function sortHorseTable(table, key, direction) {
+    const rows = Array.from(table.querySelectorAll('tr.HorseList'));
+    const parent = rows[0]?.parentNode;
+    if (!parent || rows.length === 0) return;
+
+    rows.sort((leftRow, rightRow) => compareHorseRows(leftRow, rightRow, key, direction));
+    rows.forEach((row) => parent.appendChild(row));
+  }
+
+  function updateSortButtons(table, activeKey, direction) {
+    table.querySelectorAll('th.sort_common').forEach((header) => {
+      header.classList.remove('tablesorter-headerAsc', 'tablesorter-headerDesc');
+    });
+
+    table.querySelectorAll(`[${SORT_BUTTON_ATTR}]`).forEach((iconWrap) => {
+      const key = iconWrap.getAttribute(SORT_BUTTON_ATTR);
+      const header = iconWrap.closest(`th[${SORT_HEADER_ATTR}]`);
+      if (!header) return;
+      if (key === activeKey) {
+        header.classList.add(
+          direction === 'asc' ? 'tablesorter-headerAsc' : 'tablesorter-headerDesc'
+        );
+        iconWrap.setAttribute(
+          'aria-label',
+          `${iconWrap.dataset.label}${direction === 'asc' ? '昇順' : '降順'}`
+        );
+      } else {
+        iconWrap.setAttribute('aria-label', `${iconWrap.dataset.label}でソート`);
+      }
+    });
+  }
+
+  function resetCustomSortButtons(table) {
+    table.querySelectorAll(`[${SORT_BUTTON_ATTR}]`).forEach((iconWrap) => {
+      iconWrap.setAttribute('aria-label', `${iconWrap.dataset.label}でソート`);
+    });
+  }
+
+  function resetRankingSortState(table) {
+    table.querySelectorAll(`th[${SORT_HEADER_ATTR}]`).forEach((header) => {
+      header.removeAttribute(SORT_DIRECTION_ATTR);
+      header.classList.remove('tablesorter-headerAsc', 'tablesorter-headerDesc');
+    });
+    resetCustomSortButtons(table);
+  }
+
+  function bindExistingSortReset(table) {
+    if (table.hasAttribute(SORT_BOUND_ATTR)) return;
+
+    table.querySelectorAll('th.sort_common').forEach((header) => {
+      if (header.hasAttribute(SORT_HEADER_ATTR)) return;
+      header.addEventListener('click', () => {
+        resetRankingSortState(table);
+      });
+    });
+
+    table.setAttribute(SORT_BOUND_ATTR, '1');
+  }
+
+  function ensureSortableHeader(th, table, key, label) {
+    if (!th) return;
+    th.setAttribute(SORT_HEADER_ATTR, key);
+    th.classList.add('sort_common');
+    th.title = `${label}リーディング順位でソート`;
+
+    let inner = th.querySelector('.Inner_Shutuba');
+    if (!inner) {
+      const currentText = th.textContent.trim();
+      th.textContent = '';
+      inner = document.createElement('div');
+      inner.className = 'Inner_Shutuba';
+      inner.textContent = currentText;
+      th.appendChild(inner);
+    }
+
+    if (!inner.querySelector(`[${SORT_BUTTON_ATTR}]`)) {
+      const iconWrap = document.createElement('span');
+      iconWrap.className = 'sort_icon';
+      iconWrap.setAttribute(SORT_BUTTON_ATTR, key);
+      iconWrap.setAttribute('aria-label', `${label}でソート`);
+      iconWrap.setAttribute('role', 'button');
+      iconWrap.setAttribute('tabindex', '0');
+      iconWrap.dataset.label = label;
+      iconWrap.style.display = 'block';
+      iconWrap.style.cursor = 'pointer';
+
+      const icon = document.createElement('i');
+      icon.className = 'fas fa-sort';
+      iconWrap.appendChild(icon);
+
+      const handleSort = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const currentDirection = th.getAttribute(SORT_DIRECTION_ATTR);
+        const nextDirection = currentDirection === 'asc' ? 'desc' : 'asc';
+        table.querySelectorAll(`th[${SORT_HEADER_ATTR}]`).forEach((header) => {
+          if (header === th) {
+            header.setAttribute(SORT_DIRECTION_ATTR, nextDirection);
+          } else {
+            header.removeAttribute(SORT_DIRECTION_ATTR);
+          }
+        });
+        sortHorseTable(table, key, nextDirection);
+        updateSortButtons(table, key, nextDirection);
+      };
+
+      iconWrap.addEventListener('click', handleSort);
+      iconWrap.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          handleSort(event);
+        }
+      });
+      inner.appendChild(iconWrap);
+    }
+  }
+
+  function applyRankingSortValues(table, ranking) {
+    const { jockey = {}, trainer = {} } = ranking || {};
+
+    table.querySelectorAll('tr.HorseList').forEach((row) => {
+      const jockeyCell = row.querySelector('td.Jockey');
+      const trainerCell = row.querySelector('td.Trainer');
+
+      if (jockeyCell) {
+        const id = extractIdFromHref(jockeyCell.querySelector('a')?.getAttribute('href'));
+        row.setAttribute('data-nk-sort-jockey', String(getSortRank(jockey, id)));
+      }
+
+      if (trainerCell) {
+        const id = extractIdFromHref(trainerCell.querySelector('a')?.getAttribute('href'));
+        row.setAttribute('data-nk-sort-trainer', String(getSortRank(trainer, id)));
+      }
+    });
+  }
+
+  function setupRankingSort(ranking) {
+    if (!location.pathname.includes('/race/shutuba.html')) return;
+
+    const table = document.querySelector('.Shutuba_Table');
+    if (!table) return;
+
+    const jockeyHeader = table.querySelector('th.Jockey');
+    const trainerHeader = table.querySelector('th.Trainer');
+    ensureSortableHeader(jockeyHeader, table, 'jockey', '騎手');
+    ensureSortableHeader(trainerHeader, table, 'trainer', '調教師');
+    applyRankingSortValues(table, ranking);
+    bindExistingSortReset(table);
   }
 
   function buildWeeklyTooltip(labelPrefix, stats, highlight) {
@@ -364,6 +537,7 @@
     if (shouldRemoveFirst) removeBadges();
     applyBadges(ranking, prefs);
     applyBadgesForTextNames(ranking, prefs);
+    setupRankingSort(ranking);
   }
 
   async function main() {
