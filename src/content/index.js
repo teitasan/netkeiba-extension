@@ -14,6 +14,8 @@
   const SORT_DIRECTION_ATTR = 'data-nk-ranking-sort-direction';
   const SORT_BOUND_ATTR = 'data-nk-ranking-sort-bound';
   const SORT_MISSING_RANK = 999999;
+  const DEFAULT_MIN_WEEKLY_RIDES = 10;
+  const WEEKLY_TOP_N = 3;
   const SELECTORS = {
     jockey: 'a[href*="db.netkeiba.com/jockey/"]',
     trainer: 'a[href*="db.netkeiba.com/trainer/"]',
@@ -59,6 +61,92 @@
       return lines.join('\n');
     }
     return '';
+  }
+
+  function normalizeMinimumWeeklyRides(value, fallback = DEFAULT_MIN_WEEKLY_RIDES) {
+    const numericValue = Number.parseInt(value, 10);
+    if (!Number.isFinite(numericValue) || numericValue < 0) return fallback;
+    return numericValue;
+  }
+
+  function buildWeeklyHighlightMap(statsMap, minRides, topN = WEEKLY_TOP_N) {
+    const entries = Object.entries(statsMap || {}).filter(([, stats]) => {
+      return stats && Number.isFinite(stats.rides) && stats.rides >= minRides;
+    });
+
+    const sortEntries = (key) =>
+      [...entries]
+        .sort(([, left], [, right]) => {
+          if (right[key] !== left[key]) return right[key] - left[key];
+          if (right.rides !== left.rides) return right.rides - left.rides;
+          return right.wins - left.wins;
+        })
+        .slice(0, topN);
+
+    const highlightMap = {};
+
+    sortEntries('win_rate').forEach(([id], index) => {
+      highlightMap[id] = { ...(highlightMap[id] || {}), win_rate_rank: index + 1 };
+    });
+
+    sortEntries('place_rate').forEach(([id], index) => {
+      highlightMap[id] = { ...(highlightMap[id] || {}), place_rate_rank: index + 1 };
+    });
+
+    return highlightMap;
+  }
+
+  function getTotalStarts(totalStats) {
+    if (!totalStats) return null;
+    const wins = Number(totalStats.wins || 0);
+    const seconds = Number(totalStats.seconds || 0);
+    const thirds = Number(totalStats.thirds || 0);
+    const others = Number(totalStats.others || 0);
+    const totalStarts = wins + seconds + thirds + others;
+    return Number.isFinite(totalStarts) ? totalStarts : null;
+  }
+
+  function buildWinRateRankMap(rankMap, statsMap, totalsMap, minStarts) {
+    const hasTotals = Object.keys(totalsMap || {}).length > 0;
+    if (!hasTotals) {
+      return { ...(rankMap || {}) };
+    }
+
+    const entries = Object.entries(statsMap || {})
+      .map(([id, stats]) => {
+        const winRate = stats?.win_rate;
+        const placeRate = stats?.place_rate;
+        const starts = getTotalStarts(totalsMap?.[id]);
+        const originalRank = rankMap?.[id] ?? SORT_MISSING_RANK;
+        return {
+          id,
+          winRate,
+          placeRate,
+          starts,
+          originalRank,
+        };
+      })
+      .filter((entry) => {
+        return (
+          Number.isFinite(entry.winRate) &&
+          Number.isFinite(entry.starts) &&
+          entry.starts >= minStarts
+        );
+      })
+      .sort((left, right) => {
+        if (right.winRate !== left.winRate) return right.winRate - left.winRate;
+        if ((right.placeRate ?? -Infinity) !== (left.placeRate ?? -Infinity)) {
+          return (right.placeRate ?? -Infinity) - (left.placeRate ?? -Infinity);
+        }
+        if (right.starts !== left.starts) return right.starts - left.starts;
+        return left.originalRank - right.originalRank;
+      });
+
+    const computedRankMap = {};
+    entries.forEach((entry, index) => {
+      computedRankMap[entry.id] = index + 1;
+    });
+    return computedRankMap;
   }
 
   function applyTooltip(el, tooltipText) {
@@ -235,6 +323,41 @@
     bindExistingSortReset(table);
   }
 
+  function buildDerivedRankingData(ranking, prefs) {
+    const {
+      jockey = {},
+      trainer = {},
+      jockey_stats = {},
+      trainer_stats = {},
+      jockey_totals = {},
+      trainer_totals = {},
+      jockey_weekly_stats = {},
+      weekly_meta = {},
+    } = ranking || {};
+
+    const minimumWeeklyRides = normalizeMinimumWeeklyRides(
+      prefs?.minimumWeeklyRides,
+      normalizeMinimumWeeklyRides(weekly_meta.min_rides)
+    );
+
+    return {
+      minimumWeeklyRides,
+      jockeyRankMap: buildWinRateRankMap(
+        jockey,
+        jockey_stats,
+        jockey_totals,
+        minimumWeeklyRides
+      ),
+      trainerRankMap: buildWinRateRankMap(
+        trainer,
+        trainer_stats,
+        trainer_totals,
+        minimumWeeklyRides
+      ),
+      weeklyHighlights: buildWeeklyHighlightMap(jockey_weekly_stats, minimumWeeklyRides),
+    };
+  }
+
   function buildWeeklyTooltip(labelPrefix, stats, highlight) {
     if (!stats) return '';
     const lines = [`${labelPrefix}成績`];
@@ -308,7 +431,13 @@
     parent.replaceChild(wrapper, textNode);
   }
 
-  const DEFAULT_PREFS = { jockey: true, trainer: true, sire: true, bms: true };
+  const DEFAULT_PREFS = {
+    jockey: true,
+    trainer: true,
+    sire: true,
+    bms: true,
+    minimumWeeklyRides: DEFAULT_MIN_WEEKLY_RIDES,
+  };
 
   function getPreferences() {
     return new Promise((resolve) => {
@@ -325,31 +454,31 @@
   /**
    * 出馬表のDOMを走査し、該当リンクにバッジを挿入する
    */
-  function applyBadges(ranking, prefs) {
+  function applyBadges(ranking, prefs, derived) {
     if (!ranking) return;
     prefs = prefs || DEFAULT_PREFS;
 
     const {
-      jockey = {},
-      trainer = {},
       sire = {},
       bms = {},
       jockey_stats = {},
-      jockey_weekly_stats = {},
-      jockey_weekly_highlights = {},
-      weekly_meta = {},
       trainer_stats = {},
+      jockey_weekly_stats = {},
+      weekly_meta = {},
       sire_stats = {},
       bms_stats = {},
     } = ranking;
+    const jockeyRankMap = derived?.jockeyRankMap || {};
+    const trainerRankMap = derived?.trainerRankMap || {};
+    const weeklyHighlights = derived?.weeklyHighlights || {};
 
     if (prefs.jockey) {
       document.querySelectorAll(SELECTORS.jockey).forEach((a) => {
         const id = extractIdFromHref(a.getAttribute('href'));
-        const rank = id ? jockey[id] : null;
+        const rank = id ? jockeyRankMap[id] : null;
         const tooltipText = id ? buildTooltipText('jockey', jockey_stats[id]) : '';
         const weeklyStats = id ? jockey_weekly_stats[id] : null;
-        const weeklyHighlight = id ? jockey_weekly_highlights[id] : null;
+        const weeklyHighlight = id ? weeklyHighlights[id] : null;
         const comparisonLabel = weekly_meta.comparison_label || '前回更新後';
         if (rank) insertBadge(a, rank, true, tooltipText);
         insertWeeklyIcon(a, weeklyStats, weeklyHighlight, comparisonLabel);
@@ -359,7 +488,7 @@
     if (prefs.trainer) {
       document.querySelectorAll(SELECTORS.trainer).forEach((a) => {
         const id = extractIdFromHref(a.getAttribute('href'));
-        const rank = id ? trainer[id] : null;
+        const rank = id ? trainerRankMap[id] : null;
         const tooltipText = id ? buildTooltipText('trainer', trainer_stats[id]) : '';
         if (rank) insertBadge(a, rank, true, tooltipText);
       });
@@ -534,10 +663,15 @@
   function run(ranking, prefs, shouldRemoveFirst = false) {
     if (!ranking) return;
     prefs = prefs || DEFAULT_PREFS;
+    const derived = buildDerivedRankingData(ranking, prefs);
     if (shouldRemoveFirst) removeBadges();
-    applyBadges(ranking, prefs);
+    applyBadges(ranking, prefs, derived);
     applyBadgesForTextNames(ranking, prefs);
-    setupRankingSort(ranking);
+    setupRankingSort({
+      ...ranking,
+      jockey: derived.jockeyRankMap,
+      trainer: derived.trainerRankMap,
+    });
   }
 
   async function main() {

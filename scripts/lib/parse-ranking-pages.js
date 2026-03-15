@@ -27,6 +27,12 @@ const CONFIG = {
       win_rate: 18,
       place_rate: 20,
     },
+    totals: {
+      wins: 4,
+      seconds: 5,
+      thirds: 6,
+      others: 7,
+    },
   },
   sire: {
     url: `${BASE}/?pid=sire_leading&year=2026`,
@@ -134,6 +140,49 @@ function buildRankMap(entries) {
 }
 
 /**
+ * 統計値ベースでID→順位マップを構築する
+ * 勝率などの降順で並べ、同値時は補助指標→元順位の順で安定化する
+ * @param {Array<{rank:number, id:string, stats?:Object<string, number>}>} entries
+ * @param {string} primaryKey
+ * @param {string=} secondaryKey
+ * @returns {Object<string, number>}
+ */
+function buildStatRankMap(entries, primaryKey, secondaryKey) {
+  const normalized = new Map();
+
+  for (const entry of entries) {
+    if (!entry?.id || !entry.stats) continue;
+    const primaryValue = entry.stats[primaryKey];
+    if (!Number.isFinite(primaryValue)) continue;
+
+    const existing = normalized.get(entry.id);
+    if (!existing || entry.rank < existing.rank) {
+      normalized.set(entry.id, entry);
+    }
+  }
+
+  const sortedEntries = [...normalized.values()].sort((left, right) => {
+    const leftPrimary = left.stats?.[primaryKey] ?? -Infinity;
+    const rightPrimary = right.stats?.[primaryKey] ?? -Infinity;
+    if (rightPrimary !== leftPrimary) return rightPrimary - leftPrimary;
+
+    if (secondaryKey) {
+      const leftSecondary = left.stats?.[secondaryKey] ?? -Infinity;
+      const rightSecondary = right.stats?.[secondaryKey] ?? -Infinity;
+      if (rightSecondary !== leftSecondary) return rightSecondary - leftSecondary;
+    }
+
+    return left.rank - right.rank;
+  });
+
+  const map = {};
+  sortedEntries.forEach((entry, index) => {
+    map[entry.id] = index + 1;
+  });
+  return map;
+}
+
+/**
  * 全ページを考慮してID→統計値のマップを構築する
  * @param {Array<{id:string, stats?:Object<string, number>}>} entries
  * @returns {Object<string, Object<string, number>>}
@@ -189,6 +238,7 @@ module.exports = {
   CONFIG,
   parsePage,
   buildRankMap,
+  buildStatRankMap,
   buildStatsMap,
   buildTotalsMap,
   buildNameToIdMap,

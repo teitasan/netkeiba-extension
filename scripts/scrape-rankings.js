@@ -12,6 +12,7 @@ const path = require('path');
 const {
   parsePage,
   buildRankMap,
+  buildStatRankMap,
   buildStatsMap,
   buildTotalsMap,
   buildNameToIdMap,
@@ -109,8 +110,11 @@ async function scrapeCategory(category) {
     }
   }
 
-  const map = buildRankMap(entries);
   const statsMap = buildStatsMap(entries);
+  const map =
+    category === 'jockey' || category === 'trainer'
+      ? buildStatRankMap(entries, 'win_rate', 'place_rate')
+      : buildRankMap(entries);
   const totalsMap = buildTotalsMap(entries);
   console.log(
     `[${category}] 順位 ${Object.keys(map).length} 件 / 統計 ${Object.keys(statsMap).length} 件取得`
@@ -158,6 +162,7 @@ async function main() {
     sire_stats: sireResult.statsMap,
     bms_stats: bmsResult.statsMap,
     jockey_totals: jockeyResult.totalsMap,
+    trainer_totals: trainerResult.totalsMap,
     jockey_weekly_stats: weekly.statsMap,
     jockey_weekly_highlights: weekly.highlightMap,
     weekly_meta: {

@@ -27,10 +27,37 @@
       padding: 4px 0;
       cursor: pointer;
     }
+    .section + .section {
+      margin-top: 10px;
+    }
     input[type="checkbox"] {
       width: 16px;
       height: 16px;
       cursor: pointer;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .field label {
+      display: block;
+      padding: 0;
+      cursor: default;
+      color: #333;
+    }
+    input[type="number"] {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 6px 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+    .hint {
+      color: #666;
+      font-size: 11px;
+      line-height: 1.4;
     }
   </style>
 </head>
@@ -41,6 +68,14 @@
     <label><input type="checkbox" id="trainer" checked> 調教師</label>
     <label><input type="checkbox" id="sire" checked> 種牡馬</label>
     <label><input type="checkbox" id="bms" checked> 母父（BMS）</label>
+  </div>
+  <div class="section">
+    <h3 class="section-title">勝率表示</h3>
+    <div class="field">
+      <label for="minimumWeeklyRides">最低騎乗数/出走数</label>
+      <input type="number" id="minimumWeeklyRides" min="0" step="1" value="10">
+      <div class="hint">この回数以上だけを勝率順位と🔥週次判定に含めます</div>
+    </div>
   </div>
   <script src="popup.js"></script>
 </body>
